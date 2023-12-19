@@ -21,6 +21,8 @@ dependencies {
     runtimeOnly("org.lwjgl:lwjgl::$lwjglNatives")
     runtimeOnly("org.lwjgl:lwjgl-glfw::$lwjglNatives")
     runtimeOnly("org.lwjgl:lwjgl-opengl::$lwjglNatives")
+
+    implementation("org.l33tlabs.twl:pngdecoder:1.0")
 }
 
 tasks.test {
