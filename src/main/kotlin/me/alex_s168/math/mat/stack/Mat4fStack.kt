@@ -12,25 +12,25 @@ class Mat4fStack(
     }
 
     fun pop() {
-        stack.removeAt(stack.size - 1)
+        stack.removeLast()
     }
 
     fun top() =
         stack.last()
 
     fun translate(a: Vec3f) {
-        stack.last().translate(a)
+        stack.last().translateSelf(a)
     }
 
     fun rotate(a: Vec3f, angle: Angle) {
-        stack.last().rotate(a, angle)
+        stack.last().rotateSelf(a, angle)
     }
 
     fun scale(by: Vec3f) {
-        stack.last().scale(by)
+        stack.last().scaleSelf(by)
     }
 
     fun scale(by: Float) {
-        stack.last().scale(Vec3f(by, by, by))
+        stack.last().scaleSelf(Vec3f(by, by, by))
     }
 }

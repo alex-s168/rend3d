@@ -197,20 +197,22 @@ class Mat4f(
         }
     }
 
-    fun translate(x: Float, y: Float, z: Float) {
+    fun translateSelf(x: Float, y: Float, z: Float) {
         this *= translateMatrix(x, y, z)
     }
 
-    fun translate(by: Vec3f) {
-        translate(by.x, by.y, by.z)
+    fun translateSelf(by: Vec3f) {
+        println(this)
+        translateSelf(by.x, by.y, by.z)
+        println(this)
     }
 
-    fun rotate(by: Vec3f, angle: Angle) {
+    fun rotateSelf(by: Vec3f, angle: Angle) {
         by *= angle.radians
         this *= rotationMatrix(by.x, by.y, by.z)
     }
 
-    fun scale(by: Vec3f) {
+    fun scaleSelf(by: Vec3f) {
         this *= scaleMatrix(by.x, by.y, by.z)
     }
 

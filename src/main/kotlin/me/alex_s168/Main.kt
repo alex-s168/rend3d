@@ -13,9 +13,10 @@ import me.alex_s168.math.mat.stack.Mat4fStack
 import me.alex_s168.math.vec.impl.Vec3f
 import me.alex_s168.rend3d.graphics.RenderSystem
 import me.alex_s168.rend3d.graphics.Window
+import me.alex_s168.rend3d.graphics.random
 import me.alex_s168.rend3d.input.Key
-import org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
-import org.lwjgl.opengl.GL11.glViewport
+import org.lwjgl.glfw.GLFW.*
+import org.lwjgl.opengl.GL11.*
 import java.io.File
 
 fun main() {
@@ -23,11 +24,6 @@ fun main() {
     RenderSystem.initialize()
 
     val window = Window("Hello World!", 300, 300, true, false)
-    window.keyCallback = { key, _, action, _ ->
-        if (key == GLFW_KEY_ESCAPE && action == Key.Action.PRESS) {
-            window.close()
-        }
-    }
     window.vSync = true
     window.visible = true
 
@@ -111,14 +107,33 @@ fun main() {
     val projection = Mat4f.perspective(Angle.fromDegrees(45f), window.width.toFloat() / window.height, 0.1f, 100f)
     val poseStack = Mat4fStack(mutableListOf(Mat4f.identity()))
 
+    window.keyCallback = { key, _, action, _ ->
+        if (key == GLFW_KEY_ESCAPE && action == Key.Action.PRESS) {
+            window.close()
+        }
+        if (key == GLFW_KEY_W && action == Key.Action.REPEAT) {
+            poseStack.translate(Vec3f(0f, 0f, -0.1f))
+        }
+        if (key == GLFW_KEY_S && action == Key.Action.REPEAT) {
+            poseStack.translate(Vec3f(0f, 0f, 0.1f))
+        }
+        if (key == GLFW_KEY_A && action == Key.Action.REPEAT) {
+            poseStack.translate(Vec3f(-0.1f, 0f, 0f))
+        }
+        if (key == GLFW_KEY_D && action == Key.Action.REPEAT) {
+            poseStack.translate(Vec3f(0.1f, 0f, 0f))
+        }
+    }
+
     window.loop {
         glViewport(0, 0, window.width, window.height)
+        glDisable(GL_CULL_FACE)
         backgroundColor = Color.BLACK
         program.execute {
+            poseStack.rotate(Vec3f(0f, 1f, 0f), Angle.fromDegrees(0.3f))
             textureSamplerParam.set(0)
             projectionMatrixParam.set(projection)
             worldMatrixParam.set(poseStack.top())
-            // poseStack.rotate(Vec3f(1f, 0f, 0f), Angle.fromDegrees(10f))
             vao.execute {
                 RenderSystem.GL.activateTexture(0)
                 texture.execute {

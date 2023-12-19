@@ -1,7 +1,5 @@
 package me.alex_s168.math.mat
 
-import me.alex_s168.math.Angle
-import me.alex_s168.math.vec.NumVecLike
 import java.nio.FloatBuffer
 
 interface FloatMatLike<S: FloatMatLike<S>>: NumMatLike<Float, S> {
@@ -33,26 +31,8 @@ interface FloatMatLike<S: FloatMatLike<S>>: NumMatLike<Float, S> {
     }
 
     override fun times(other: NumMatLike<*, *>): S {
-        val result = new()
-        for (i in 0 until kotlin.math.min(size, other.size)) {
-            result[i] = this[i] * other[i].toFloat()
-        }
-        return result
-    }
-
-    override fun div(other: NumMatLike<*, *>): S {
-        val result = new()
-        for (i in 0 until kotlin.math.min(size, other.size)) {
-            result[i] = this[i] / other[i].toFloat()
-        }
-        return result
-    }
-
-    override fun rem(other: NumMatLike<*, *>): S {
-        val result = new()
-        for (i in 0 until kotlin.math.min(size, other.size)) {
-            result[i] = this[i] % other[i].toFloat()
-        }
+        val result = copy()
+        result *= other
         return result
     }
 
@@ -77,20 +57,42 @@ interface FloatMatLike<S: FloatMatLike<S>>: NumMatLike<Float, S> {
     }
 
     override fun timesAssign(other: NumMatLike<*, *>) {
-        for (i in 0 until kotlin.math.min(size, other.size)) {
-            this[i] *= other[i].toFloat()
+        for (i in 0 until height) {
+            for (j in 0 until width) {
+                var sum = 0f
+                for (k in 0 until width) {
+                    sum += this[i, k] * other[k, j].toFloat()
+                }
+                this[i, j] = sum
+            }
         }
     }
 
-    override fun divAssign(other: NumMatLike<*, *>) {
-        for (i in 0 until kotlin.math.min(size, other.size)) {
-            this[i] /= other[i].toFloat()
+    override fun times(scalar: Float): S {
+        val result = new()
+        for (i in 0 until size) {
+            result[i] = this[i] * scalar
+        }
+        return result
+    }
+
+    override fun timesAssign(scalar: Float) {
+        for (i in 0 until size) {
+            this[i] *= scalar
         }
     }
 
-    override fun remAssign(other: NumMatLike<*, *>) {
-        for (i in 0 until kotlin.math.min(size, other.size)) {
-            this[i] %= other[i].toFloat()
+    override fun div(scalar: Float): S {
+        val result = new()
+        for (i in 0 until size) {
+            result[i] = this[i] / scalar
+        }
+        return result
+    }
+
+    override fun divAssign(scalar: Float) {
+        for (i in 0 until size) {
+            this[i] /= scalar
         }
     }
 

@@ -32,26 +32,8 @@ interface IntMatLike<S: IntMatLike<S>>: NumMatLike<Int, S> {
     }
 
     override fun times(other: NumMatLike<*, *>): S {
-        val result = new()
-        for (i in 0 until kotlin.math.min(size, other.size)) {
-            result[i] = this[i] * other[i].toInt()
-        }
-        return result
-    }
-
-    override fun div(other: NumMatLike<*, *>): S {
-        val result = new()
-        for (i in 0 until kotlin.math.min(size, other.size)) {
-            result[i] = this[i] / other[i].toInt()
-        }
-        return result
-    }
-
-    override fun rem(other: NumMatLike<*, *>): S {
-        val result = new()
-        for (i in 0 until kotlin.math.min(size, other.size)) {
-            result[i] = this[i] % other[i].toInt()
-        }
+        val result = copy()
+        result *= other
         return result
     }
 
@@ -76,20 +58,42 @@ interface IntMatLike<S: IntMatLike<S>>: NumMatLike<Int, S> {
     }
 
     override fun timesAssign(other: NumMatLike<*, *>) {
-        for (i in 0 until kotlin.math.min(size, other.size)) {
-            this[i] *= other[i].toInt()
+        for (i in 0 until height) {
+            for (j in 0 until width) {
+                var sum = 0
+                for (k in 0 until width) {
+                    sum += this[i, k] * other[k, j].toInt()
+                }
+                this[i, j] = sum
+            }
         }
     }
 
-    override fun divAssign(other: NumMatLike<*, *>) {
-        for (i in 0 until kotlin.math.min(size, other.size)) {
-            this[i] /= other[i].toInt()
+    override fun times(scalar: Int): S {
+        val result = new()
+        for (i in 0 until size) {
+            result[i] = this[i] * scalar
+        }
+        return result
+    }
+
+    override fun timesAssign(scalar: Int) {
+        for (i in 0 until size) {
+            this[i] *= scalar
         }
     }
 
-    override fun remAssign(other: NumMatLike<*, *>) {
-        for (i in 0 until kotlin.math.min(size, other.size)) {
-            this[i] %= other[i].toInt()
+    override fun div(scalar: Int): S {
+        val result = new()
+        for (i in 0 until size) {
+            result[i] = this[i] / scalar
+        }
+        return result
+    }
+
+    override fun divAssign(scalar: Int) {
+        for (i in 0 until size) {
+            this[i] /= scalar
         }
     }
 

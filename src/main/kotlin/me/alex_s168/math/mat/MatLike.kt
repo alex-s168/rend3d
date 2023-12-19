@@ -45,4 +45,7 @@ interface MatLike<T, S>: Collection<T> {
 
     val width: Int get() =
         sqrt(size.toDouble()).toInt()
+
+    val height: Int get() =
+        sqrt(size.toDouble()).toInt()
 }

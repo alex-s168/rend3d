@@ -20,3 +20,6 @@ fun IntArray.toIntBuffer(): IntBuffer =
         it.put(this)
         it.flip()
     }
+
+fun ClosedFloatingPointRange<Float>.random() =
+    (Math.random() * (endInclusive - start) + start).toFloat()
