@@ -1,5 +1,6 @@
 package me.alex_s168.math.mat
 
+import me.alex_s168.math.Angle
 import me.alex_s168.math.vec.NumVecLike
 import java.nio.FloatBuffer
 
@@ -93,99 +94,16 @@ interface FloatMatLike<S: FloatMatLike<S>>: NumMatLike<Float, S> {
         }
     }
 
-    override fun translate(other: NumMatLike<*, *>): S {
-        val result = new()
-        for (i in 0 until size) {
-            result[i] = this[i] + other[i].toFloat()
-        }
-        return result
-    }
-
-    override fun translateSelf(other: NumMatLike<*, *>): S {
-        for (i in 0 until size) {
-            this[i] += other[i].toFloat()
-        }
-        return this as S
-    }
-
-    override fun translate(other: NumVecLike<*, *>): S {
-        val result = new()
-        for (i in 0 until size) {
-            result[i] = this[i] + other[i].toFloat()
-        }
-        return result
-    }
-
-    override fun translateSelf(other: NumVecLike<*, *>): S {
-        for (i in 0 until size) {
-            this[i] += other[i].toFloat()
-        }
-        return this as S
-    }
-
-    override fun rotate(other: NumMatLike<*, *>): S {
-        val result = new()
-        for (i in 0 until size) {
-            result[i] = this[i] * other[i].toFloat()
-        }
-        return result
-    }
-
-    override fun rotateSelf(other: NumMatLike<*, *>): S {
-        for (i in 0 until size) {
-            this[i] *= other[i].toFloat()
-        }
-        return this as S
-    }
-
-    override fun rotate(other: NumVecLike<*, *>): S {
-        val result = new()
-        for (i in 0 until size) {
-            result[i] = this[i] * other[i].toFloat()
-        }
-        return result
-    }
-
-    override fun rotateSelf(other: NumVecLike<*, *>): S {
-        for (i in 0 until size) {
-            this[i] *= other[i].toFloat()
-        }
-        return this as S
-    }
-
-    override fun scale(other: NumMatLike<*, *>): S {
-        val result = new()
-        for (i in 0 until size) {
-            result[i] = this[i] * other[i].toFloat()
-        }
-        return result
-    }
-
-    override fun scaleSelf(other: NumMatLike<*, *>): S {
-        for (i in 0 until size) {
-            this[i] *= other[i].toFloat()
-        }
-        return this as S
-    }
-
-    override fun scale(other: NumVecLike<*, *>): S {
-        val result = new()
-        for (i in 0 until size) {
-            result[i] = this[i] * other[i].toFloat()
-        }
-        return result
-    }
-
-    override fun scaleSelf(other: NumVecLike<*, *>): S {
-        for (i in 0 until size) {
-            this[i] *= other[i].toFloat()
-        }
-        return this as S
-    }
-
     override fun zeroSelf(): S {
         for (i in 0 until size) {
             this[i] = 0f
+        }
+        return this as S
+    }
+
+    override fun identitySelf(): S {
+        for (i in 0 until size) {
+            this[i] = if (i % (width + 1) == 0) 1f else 0f
         }
         return this as S
     }

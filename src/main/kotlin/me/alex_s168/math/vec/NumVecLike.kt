@@ -14,6 +14,18 @@ interface NumVecLike<T: Number, S>: VecLike<T, S> {
     operator fun timesAssign(other: NumVecLike<*, *>)
     operator fun divAssign(other: NumVecLike<*, *>)
     operator fun remAssign(other: NumVecLike<*, *>)
+
+    operator fun plus(other: T): S
+    operator fun minus(other: T): S
+    operator fun times(other: T): S
+    operator fun div(other: T): S
+    operator fun rem(other: T): S
+    operator fun plusAssign(other: T)
+    operator fun minusAssign(other: T)
+    operator fun timesAssign(other: T)
+    operator fun divAssign(other: T)
+    operator fun remAssign(other: T)
+
     infix fun dot(other: NumVecLike<*, *>): T
     // TODO: Cross product
     fun length(): Double

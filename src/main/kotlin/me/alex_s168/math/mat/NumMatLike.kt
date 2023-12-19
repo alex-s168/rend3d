@@ -15,23 +15,7 @@ interface NumMatLike<T: Number, S>: MatLike<T, S> {
     operator fun divAssign(other: NumMatLike<*, *>)
     operator fun remAssign(other: NumMatLike<*, *>)
 
-    fun translate(other: NumMatLike<*, *>): S
-    fun translateSelf(other: NumMatLike<*, *>): S
-
-    fun translate(other: NumVecLike<*, *>): S
-    fun translateSelf(other: NumVecLike<*, *>): S
-
-    fun rotate(other: NumMatLike<*, *>): S
-    fun rotateSelf(other: NumMatLike<*, *>): S
-
-    fun rotate(other: NumVecLike<*, *>): S
-    fun rotateSelf(other: NumVecLike<*, *>): S
-
-    fun scale(other: NumMatLike<*, *>): S
-    fun scaleSelf(other: NumMatLike<*, *>): S
-
-    fun scale(other: NumVecLike<*, *>): S
-    fun scaleSelf(other: NumVecLike<*, *>): S
-
     fun zeroSelf(): S
+
+    fun identitySelf(): S
 }

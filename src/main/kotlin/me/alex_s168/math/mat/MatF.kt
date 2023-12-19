@@ -17,11 +17,11 @@ abstract class MatF<S: MatF<S>>(
     }
 
     override fun get(row: Int, col: Int): Float {
-        return data[row * size + col]
+        return data[row * width + col]
     }
 
     override fun set(row: Int, col: Int, value: Float) {
-        data[row * size + col] = value
+        data[row * width + col] = value
     }
 
     override fun writeTo(buffer: FloatBuffer) {

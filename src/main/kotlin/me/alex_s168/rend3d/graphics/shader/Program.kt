@@ -3,6 +3,10 @@ package me.alex_s168.rend3d.graphics.shader
 import me.alex_s168.rend3d.graphics.RenderSystem
 import me.alex_s168.rend3d.graphics.toGLFW
 import me.alex_s168.math.color.Color
+import me.alex_s168.math.mat.impl.Mat2f
+import me.alex_s168.math.mat.impl.Mat2i
+import me.alex_s168.math.mat.impl.Mat3f
+import me.alex_s168.math.mat.impl.Mat4f
 import me.alex_s168.math.vec.impl.*
 import org.lwjgl.opengl.GL20.*
 
@@ -184,7 +188,20 @@ class Program(
             glUniform4fv(location, value.asArray())
         }
 
-        // TODO: matrices
+        fun set(value: Mat2f) {
+            assertUsable()
+            glUniformMatrix2fv(location, false, value.asArray())
+        }
+
+        fun set(value: Mat3f) {
+            assertUsable()
+            glUniformMatrix3fv(location, false, value.asArray())
+        }
+
+        fun set(value: Mat4f) {
+            assertUsable()
+            glUniformMatrix4fv(location, false, value.asArray())
+        }
     }
 
 }

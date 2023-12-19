@@ -1,5 +1,7 @@
 package me.alex_s168.math.mat
 
+import kotlin.math.sqrt
+
 interface MatLike<T, S>: Collection<T> {
     operator fun get(row: Int, col: Int): T
     operator fun set(row: Int, col: Int, value: T)
@@ -40,4 +42,7 @@ interface MatLike<T, S>: Collection<T> {
         false
 
     fun copy(): S
+
+    val width: Int get() =
+        sqrt(size.toDouble()).toInt()
 }

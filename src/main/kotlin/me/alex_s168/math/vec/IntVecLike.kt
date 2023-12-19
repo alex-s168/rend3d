@@ -93,6 +93,76 @@ interface IntVecLike<S: IntVecLike<S>>: NumVecLike<Int, S> {
         }
     }
 
+    override fun plus(other: Int): S {
+        val result = new()
+        for (i in 0 until size) {
+            result[i] = this[i] + other
+        }
+        return result
+    }
+
+    override fun minus(other: Int): S {
+        val result = new()
+        for (i in 0 until size) {
+            result[i] = this[i] - other
+        }
+        return result
+    }
+
+    override fun times(other: Int): S {
+        val result = new()
+        for (i in 0 until size) {
+            result[i] = this[i] * other
+        }
+        return result
+    }
+
+    override fun div(other: Int): S {
+        val result = new()
+        for (i in 0 until size) {
+            result[i] = this[i] / other
+        }
+        return result
+    }
+
+    override fun rem(other: Int): S {
+        val result = new()
+        for (i in 0 until size) {
+            result[i] = this[i] % other
+        }
+        return result
+    }
+
+    override fun plusAssign(other: Int) {
+        for (i in 0 until size) {
+            this[i] += other
+        }
+    }
+
+    override fun minusAssign(other: Int) {
+        for (i in 0 until size) {
+            this[i] -= other
+        }
+    }
+
+    override fun timesAssign(other: Int) {
+        for (i in 0 until size) {
+            this[i] *= other
+        }
+    }
+
+    override fun divAssign(other: Int) {
+        for (i in 0 until size) {
+            this[i] /= other
+        }
+    }
+
+    override fun remAssign(other: Int) {
+        for (i in 0 until size) {
+            this[i] %= other
+        }
+    }
+
     override fun dot(other: NumVecLike<*, *>): Int {
         var result = 0
         for (i in 0 until kotlin.math.min(size, other.size)) {

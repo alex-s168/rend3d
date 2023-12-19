@@ -1,5 +1,6 @@
 package me.alex_s168
 
+import me.alex_s168.math.Angle
 import me.alex_s168.rend3d.graphics.data.GPUBufferObject
 import me.alex_s168.rend3d.graphics.data.VertexArrayObject
 import me.alex_s168.rend3d.graphics.shader.GPUBufferProgramAttribute
@@ -7,10 +8,14 @@ import me.alex_s168.rend3d.graphics.shader.Program
 import me.alex_s168.rend3d.graphics.shader.Shader
 import me.alex_s168.rend3d.graphics.texture.Texture
 import me.alex_s168.math.color.Color
+import me.alex_s168.math.mat.impl.Mat4f
+import me.alex_s168.math.mat.stack.Mat4fStack
+import me.alex_s168.math.vec.impl.Vec3f
 import me.alex_s168.rend3d.graphics.RenderSystem
 import me.alex_s168.rend3d.graphics.Window
 import me.alex_s168.rend3d.input.Key
 import org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
+import org.lwjgl.opengl.GL11.glViewport
 import java.io.File
 
 fun main() {
@@ -35,9 +40,12 @@ fun main() {
         in  vec2 in_TexCoord;
 
         out vec2 out_TexCoord;
+        
+        uniform mat4 worldMatrix;
+        uniform mat4 projectionMatrix;
 
         void main() {
-            gl_Position = vec4(in_Position.x, in_Position.y, in_Position.z, 1.0);
+            gl_Position = projectionMatrix * worldMatrix * vec4(in_Position, 1.0);
             out_TexCoord = in_TexCoord;
         }
     """.trimIndent()
@@ -50,10 +58,10 @@ fun main() {
         in  vec2 out_TexCoord;
         out vec4 fragColor;
         
-        uniform sampler2D texture_sampler;
+        uniform sampler2D textureSampler;
 
         void main() {
-            fragColor = texture(texture_sampler, out_TexCoord); 
+            fragColor = texture(textureSampler, out_TexCoord); 
         }
     """.trimIndent()
 
@@ -96,12 +104,21 @@ fun main() {
     program.attributes["in_TexCoord"] = attributeTex
     program.link()
 
-    val textureSamplerParam = program.parameters["texture_sampler"]
+    val textureSamplerParam = program.parameters["textureSampler"]
+    val worldMatrixParam = program.parameters["worldMatrix"]
+    val projectionMatrixParam = program.parameters["projectionMatrix"]
+
+    val projection = Mat4f.perspective(Angle.fromDegrees(45f), window.width.toFloat() / window.height, 0.1f, 100f)
+    val poseStack = Mat4fStack(mutableListOf(Mat4f.identity()))
 
     window.loop {
+        glViewport(0, 0, window.width, window.height)
         backgroundColor = Color.BLACK
         program.execute {
             textureSamplerParam.set(0)
+            projectionMatrixParam.set(projection)
+            worldMatrixParam.set(poseStack.top())
+            // poseStack.rotate(Vec3f(1f, 0f, 0f), Angle.fromDegrees(10f))
             vao.execute {
                 RenderSystem.GL.activateTexture(0)
                 texture.execute {

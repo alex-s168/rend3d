@@ -113,6 +113,14 @@ class Mat4i(
 
         fun wrap(mat: MatI<*>, offset: Int = 0) =
             Mat4i(mat.data, mat.offset + offset)
+
+        fun identity() =
+            Mat4i(
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0 ,1
+            )
     }
 
 }

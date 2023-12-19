@@ -1,6 +1,11 @@
 package me.alex_s168.math.mat.impl
 
+import me.alex_s168.math.Angle
 import me.alex_s168.math.mat.MatF
+import me.alex_s168.math.vec.impl.Vec3f
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.tan
 
 class Mat4f(
     data: FloatArray = FloatArray(16),
@@ -113,6 +118,100 @@ class Mat4f(
 
         fun wrap(mat: MatF<*>, offset: Int = 0) =
             Mat4f(mat.data, mat.offset + offset)
+
+        fun identity() =
+            Mat4f(
+                1f, 0f, 0f, 0f,
+                0f, 1f, 0f, 0f,
+                0f, 0f, 1f, 0f,
+                0f, 0f, 0f, 1f
+            )
+
+        fun perspective(fov: Angle, aspect: Float, near: Float, far: Float): Mat4f {
+            val frustumLength = far - near
+            val yScale = ((1 / tan(fov.radians / 2)) * aspect)
+            val xScale = yScale / aspect
+            val mat = Mat4f()
+            mat.m00 = xScale
+            mat.m11 = yScale
+            mat.m22 = -((far + near) / frustumLength)
+            mat.m23 = -1f
+            mat.m32 = -((2 * near * far) / frustumLength)
+            mat.m33 = 0f
+            return mat
+        }
+
+        private fun scaleMatrix(sx: Float, sy: Float, sz: Float): Mat4f {
+            return Mat4f(
+                sx, 0f, 0f, 0f,
+                0f, sy, 0f, 0f,
+                0f, 0f, sz, 0f,
+                0f, 0f, 0f, 1f
+            )
+        }
+
+        private fun translateMatrix(x: Float, y: Float, z: Float): Mat4f {
+            return Mat4f(
+                1f, 0f, 0f, x,
+                0f, 1f, 0f, y,
+                0f, 0f, 1f, z,
+                0f, 0f, 0f, 1f
+            )
+        }
+
+        private fun rotationMatrixX(radians: Float): Mat4f {
+            val crad = cos(radians.toDouble()).toFloat()
+            val srad = sin(radians.toDouble()).toFloat()
+            return Mat4f(
+                1f, 0f, 0f, 0f,
+                0f, crad, srad, 0f,
+                0f, -srad, crad, 0f,
+                0f, 0f, 0f, 1f
+            )
+        }
+
+        private fun rotationMatrixY(radians: Float): Mat4f {
+            val crad = cos(radians.toDouble()).toFloat()
+            val srad = sin(radians.toDouble()).toFloat()
+            return Mat4f(
+                crad, 0f, -srad, 0f,
+                0f, 1f, 0f, 0f,
+                srad, 0f, crad, 0f,
+                0f, 0f, 0f, 1f
+            )
+        }
+
+        private fun rotationMatrixZ(radians: Float): Mat4f {
+            val crad = cos(radians.toDouble()).toFloat()
+            val srad = sin(radians.toDouble()).toFloat()
+            return Mat4f(
+                crad, -srad, 0f, 0f,
+                srad, crad, 0f, 0f,
+                0f, 0f, 1f, 0f,
+                0f, 0f, 0f, 1f
+            )
+        }
+
+        private fun rotationMatrix(rx: Float, ry: Float, rz: Float): Mat4f {
+            return rotationMatrixZ(rz) * rotationMatrixY(ry) * rotationMatrixX(rx)
+        }
+    }
+
+    fun translate(x: Float, y: Float, z: Float) {
+        this *= translateMatrix(x, y, z)
+    }
+
+    fun translate(by: Vec3f) {
+        translate(by.x, by.y, by.z)
+    }
+
+    fun rotate(by: Vec3f, angle: Angle) {
+        by *= angle.radians
+        this *= rotationMatrix(by.x, by.y, by.z)
+    }
+
+    fun scale(by: Vec3f) {
+        this *= scaleMatrix(by.x, by.y, by.z)
     }
 
 }
