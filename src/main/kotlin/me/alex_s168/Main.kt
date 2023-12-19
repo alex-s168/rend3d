@@ -11,8 +11,6 @@ import me.alex_s168.rend3d.graphics.RenderSystem
 import me.alex_s168.rend3d.graphics.Window
 import me.alex_s168.rend3d.input.Key
 import org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
-import org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT
-import org.lwjgl.opengl.GL11.glClear
 import java.io.File
 
 fun main() {
@@ -98,17 +96,18 @@ fun main() {
     program.attributes["in_TexCoord"] = attributeTex
     program.link()
 
+    val textureSamplerParam = program.parameters["texture_sampler"]
+
     window.loop {
         backgroundColor = Color.BLACK
-        glClear(GL_COLOR_BUFFER_BIT)
-
         program.execute {
-            program.parameters["texture_sampler"].set(0)
-            vao.bind()
-            RenderSystem.GL.activateTexture(0)
-            texture.bind2d()
-            drawArrays(RenderSystem.RenderMode.TRIANGLES, 0, 3)
-            texture.bind2d()
+            textureSamplerParam.set(0)
+            vao.execute {
+                RenderSystem.GL.activateTexture(0)
+                texture.execute {
+                    drawArrays(RenderSystem.RenderMode.TRIANGLES, 0, 3)
+                }
+            }
         }
     }
 

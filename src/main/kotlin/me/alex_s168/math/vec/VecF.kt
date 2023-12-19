@@ -1,6 +1,7 @@
 package me.alex_s168.math.vec
 
 import java.nio.FloatBuffer
+import java.util.*
 
 abstract class VecF<S: VecF<S>>(
     final override val size: Int,
@@ -62,4 +63,9 @@ abstract class VecF<S: VecF<S>>(
     override fun set(index: Int, value: Float) {
         data[index + offset] = value
     }
+    override fun zeroSelf(): S {
+        Arrays.fill(data, offset, size + offset, 0f)
+        return this as S
+    }
+
 }

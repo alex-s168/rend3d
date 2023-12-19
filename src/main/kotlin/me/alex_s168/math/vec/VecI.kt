@@ -1,6 +1,7 @@
 package me.alex_s168.math.vec
 
 import java.nio.IntBuffer
+import java.util.Arrays
 
 abstract class VecI<S: VecI<S>>(
     final override val size: Int,
@@ -61,5 +62,10 @@ abstract class VecI<S: VecI<S>>(
 
     override fun set(index: Int, value: Int) {
         data[index + offset] = value
+    }
+
+    override fun zeroSelf(): S {
+        Arrays.fill(data, offset, size + offset, 0)
+        return this as S
     }
 }

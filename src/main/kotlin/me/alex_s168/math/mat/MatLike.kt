@@ -1,18 +1,21 @@
-package me.alex_s168.math.vec
+package me.alex_s168.math.mat
 
-interface VecLike<T, S>: Collection<T> {
+interface MatLike<T, S>: Collection<T> {
+    operator fun get(row: Int, col: Int): T
+    operator fun set(row: Int, col: Int, value: T)
+
     operator fun get(index: Int): T
     operator fun set(index: Int, value: T)
 
     override fun iterator(): Iterator<T> =
-        VecIterator(this)
+        MatIterator(this)
 
-    class VecIterator<T, S>(val vec: VecLike<T, S>): Iterator<T> {
+    class MatIterator<T, S>(val mat: MatLike<T, S>): Iterator<T> {
         var index = 0
         override fun hasNext(): Boolean =
-            index < vec.size
+            index < mat.size
         override fun next(): T =
-            vec[index++]
+            mat[index++]
     }
 
     override fun contains(element: T): Boolean {

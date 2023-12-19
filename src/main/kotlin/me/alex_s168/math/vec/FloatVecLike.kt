@@ -124,11 +124,12 @@ interface FloatVecLike<S: FloatVecLike<S>>: NumVecLike<Float, S> {
         return result
     }
 
-    override fun normalizeSelf() {
+    override fun normalizeSelf(): S {
         val len = length()
         for (i in 0 until size) {
             this[i] /= len.toFloat()
         }
+        return this as S
     }
 
     override fun lerp(other: NumVecLike<*, *>, t: Double): S {

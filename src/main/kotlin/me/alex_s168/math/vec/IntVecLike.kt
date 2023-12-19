@@ -124,11 +124,12 @@ interface IntVecLike<S: IntVecLike<S>>: NumVecLike<Int, S> {
         return result
     }
 
-    override fun normalizeSelf() {
+    override fun normalizeSelf(): S {
         val len = length()
         for (i in 0 until size) {
             this[i] /= len.toInt()
         }
+        return this as S
     }
 
     override fun lerp(other: NumVecLike<*, *>, t: Double): S {
