@@ -17,6 +17,9 @@ class Window(
 ): AutoCloseable {
     private var id: Long
 
+    val aspect: Float
+        get() = width.toFloat() / height.toFloat()
+
     var visible = visibleIn
         set(value) {
             field = value

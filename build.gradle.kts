@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm") version "1.9.21"
+    idea
 }
 
 group = "me.alex_s168"
@@ -7,6 +8,18 @@ version = "0.1"
 
 repositories {
     mavenCentral()
+    maven {
+        name = "alex's repo"
+        url = uri("http://207.180.202.42:8080/libs")
+        isAllowInsecureProtocol = true
+    }
+}
+
+idea {
+    module {
+        isDownloadJavadoc = true
+        isDownloadSources = true
+    }
 }
 
 dependencies {
@@ -23,6 +36,8 @@ dependencies {
     runtimeOnly("org.lwjgl:lwjgl-opengl::$lwjglNatives")
 
     implementation("org.l33tlabs.twl:pngdecoder:1.0")
+
+    implementation("me.alex_s168:mathlib:0.5h2")
 }
 
 tasks.test {
