@@ -61,7 +61,7 @@ fun main() {
     val texture = Texture.fromPNG(File("src/main/resources/x_90_talon_dark_gray.png").inputStream())
 
     val model = OBJModelFormat().loadFrom(File("src/main/resources/x_90_talon.obj").readText())
-    val modelObject = ModelRender(model.groups, texture)
+    val modelObject = ModelRender(model.groups, texture, true)
 
     val projection = Mat4f.identity() * Mat4f.perspective(Anglef.fromDegrees(70f), window.aspect, 1f, 1000f)
     val poseStack = Mat4fStack(mutableListOf(Mat4f.identity()))
@@ -87,8 +87,7 @@ fun main() {
     }
 
     modelObject.initRender()
-    modelObject.scale = Vec3f(0.1f, 0.1f, 0.1f)
-
+    modelObject.scale = Vec3f(0.5f, 0.5f, 0.5f)
     window.loop {
         backgroundColor = Color.BLACK
         println(modelObject.position)

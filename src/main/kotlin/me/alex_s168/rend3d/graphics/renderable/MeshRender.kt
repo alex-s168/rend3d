@@ -12,10 +12,12 @@ import me.alex_s168.rend3d.graphics.shader.Program
 import me.alex_s168.rend3d.graphics.shader.Shader
 import me.alex_s168.rend3d.graphics.texture.Texture
 import me.alex_s168.rend3d.obj.Object3
+import org.lwjgl.opengl.GL11.*
 
 class MeshRender(
     val mesh: Mesh,
-    val texture: Texture
+    val texture: Texture,
+    val invertTexture: Boolean = false
 ): Object3(), Renderable {
     private lateinit var program: Program
     private lateinit var vao: VertexArrayObject
@@ -37,7 +39,9 @@ class MeshRender(
         RenderSystem.enableBlend()
         RenderSystem.blendFunc(RenderSystem.BlendFuncParam.SRC_ALPHA, RenderSystem.BlendFuncParam.ONE_MINUS_SRC_ALPHA)
 
-        // RenderSystem.enableCullFace(front = false, back = true)
+        // RenderSystem.enableCullFace(front = true, back = false)
+        // glFrontFace(GL_CCW)
+        RenderSystem.disableCullFace()
 
         program.execute {
             RenderSystem.allocateTextureSampler { textureSampler ->
@@ -47,7 +51,7 @@ class MeshRender(
                 vao.execute {
                     texture.execute {
                         textureSampler.bind()
-                        drawArrays(RenderSystem.RenderMode.TRIANGLES, 0, mesh.size * 3 * 3)
+                        drawArrays(RenderSystem.RenderMode.TRIANGLES, 0, mesh.size * 3)
                     }
                 }
             }
@@ -80,7 +84,13 @@ class MeshRender(
             bufferTex.bufferData(sizeBytes = Float.SIZE_BYTES * 2 * 3 * mesh.size) {
                 mesh.forEach { face ->
                     fun s(v: TextureCoordinate?) {
-                        upload(floatArrayOf(1f - (v?.u ?: 0.0f), 1f - (v?.v ?: 0.0f)))
+                        val fu = v?.u ?: 0.0f
+                        val fv = v?.v ?: 0.0f
+                        if (invertTexture) {
+                            upload(floatArrayOf(fu, 1.0f - fv))
+                        } else {
+                            upload(floatArrayOf(fu, fv))
+                        }
                     }
                     s(face.tex?.a)
                     s(face.tex?.b)

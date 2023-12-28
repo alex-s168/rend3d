@@ -8,9 +8,10 @@ import me.alex_s168.rend3d.obj.Object3
 
 class ModelRender(
     models: Iterable<ModelRaw>,
-    val texture: Texture
+    val texture: Texture,
+    val invertTexture: Boolean = false
 ): Object3(), Renderable {
-    private val meshRenders = models.map { MeshRender(it.mesh, texture) }
+    private val meshRenders = models.map { MeshRender(it.mesh, texture, invertTexture) }
 
     override fun render(poseStack: Mat4fStack, projection: Mat4f, partial: Float) {
         poseStack.push()
