@@ -166,10 +166,31 @@ object RenderSystem {
             glPolygonMode(GL_FRONT_AND_BACK, if (value) GL_LINE else GL_FILL)
         }
 
+    private val textureSamplers by lazy {
+        BooleanArray(GL.getInteger(GL_MAX_TEXTURE_UNITS)) { false }
+    }
+
+    data class TextureSampler internal constructor(val id: Int) {
+        fun bind() {
+            GL.logRenderCall("ActiveTexture", id)
+            glActiveTexture(GL_TEXTURE0 + id)
+        }
+    }
+
+    fun allocateTextureSampler(block: (TextureSampler) -> Unit) {
+        val id = textureSamplers.indexOfFirst { !it }
+        if (id == -1) {
+            throw IllegalStateException("No free texture samplers!")
+        }
+        textureSamplers[id] = true
+        block(TextureSampler(id))
+        textureSamplers[id] = false
+    }
+
     object GL {
-        fun activateTexture(unit: Int) {
-            logRenderCall("ActiveTexture", unit)
-            glActiveTexture(GL_TEXTURE0 + unit)
+        fun getInteger(name: Int): Int {
+            logRenderCall("GetInteger", name)
+            return glGetInteger(name)
         }
 
         fun pixelStorei(name: Int, value: Int) {

@@ -11,8 +11,8 @@ class GPUBufferProgramAttribute(
     val buffer: GPUBufferObject
 ): ProgramAttribute(), UploadTarget {
 
-    override fun execute(block: UploadTargetContext.() -> Unit) =
-        buffer.execute(block)
+    override fun bufferData(usage: GPUBufferObject.Usage, sizeBytes: Int, block: UploadTargetContext.() -> Unit) =
+        buffer.bufferData(usage, sizeBytes, block)
 
     var configured = false
         private set

@@ -148,6 +148,11 @@ class Program(
             glUniform1i(location, value)
         }
 
+        fun set(value: RenderSystem.TextureSampler) {
+            assertUsable()
+            glUniform1i(location, value.id)
+        }
+
         fun set(value: Boolean) {
             assertUsable()
             glUniform1i(location, value.toGLFW())

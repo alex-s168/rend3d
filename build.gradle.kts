@@ -13,6 +13,10 @@ repositories {
         url = uri("http://207.180.202.42:8080/libs")
         isAllowInsecureProtocol = true
     }
+    maven {
+        name = "jitpack"
+        url = uri("https://jitpack.io")
+    }
 }
 
 idea {
@@ -37,7 +41,9 @@ dependencies {
 
     implementation("org.l33tlabs.twl:pngdecoder:1.0")
 
-    implementation("me.alex_s168:mathlib:0.5h2")
+    implementation("me.alex_s168:mathlib:0.5h4")
+    implementation("me.alex_s168:meshlib:0.6")
+    implementation("com.github.alex-s168:ktlib:4a380bf749")
 }
 
 tasks.test {

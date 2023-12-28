@@ -12,9 +12,9 @@ class GPUBufferObject(
         RenderSystem.GL.bindBuffer(type.glType, id)
     }
 
-    override fun execute(block: UploadTargetContext.() -> Unit) {
+    override fun bufferData(usage: Usage, sizeBytes: Int, block: UploadTargetContext.() -> Unit) {
         bind()
-        UploadTargetContext(type.glType).block()
+        UploadTargetContext(type.glType, usage, sizeBytes).also(block).finalize()
     }
 
     override fun close() {

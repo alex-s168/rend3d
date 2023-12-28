@@ -1,25 +1,35 @@
 package me.alex_s168
 
 import me.alex_s168.math.Anglef
+/*
 import me.alex_s168.rend3d.graphics.data.GPUBufferObject
 import me.alex_s168.rend3d.graphics.data.VertexArrayObject
 import me.alex_s168.rend3d.graphics.shader.GPUBufferProgramAttribute
 import me.alex_s168.rend3d.graphics.shader.Program
 import me.alex_s168.rend3d.graphics.shader.Shader
+ import me.alex_s168.math.mat.impl.Mat3f
+ import me.alex_s168.math.vec.impl.Quaternionf
+ */
 import me.alex_s168.rend3d.graphics.texture.Texture
 import me.alex_s168.math.color.Color
+
 import me.alex_s168.math.mat.impl.Mat4f
 import me.alex_s168.math.mat.stack.Mat4fStack
 import me.alex_s168.math.vec.impl.Quaternionf
+
 import me.alex_s168.math.vec.impl.Vec3f
+import me.alex_s168.meshlib.Mesh
+import me.alex_s168.meshlib.Triangle
+import me.alex_s168.meshlib.format.OBJModelFormat
+import me.alex_s168.meshlib.texture.TextureCoordinate
+import me.alex_s168.meshlib.texture.TextureFace
 import me.alex_s168.rend3d.graphics.RenderSystem
 import me.alex_s168.rend3d.graphics.Window
+import me.alex_s168.rend3d.graphics.renderable.MeshRender
 import me.alex_s168.rend3d.input.Key
+import me.alex_s168.rend3d.obj.CombinedObject3
 import org.lwjgl.glfw.GLFW.*
-import org.lwjgl.opengl.GL11.*
-import org.lwjgl.opengl.GL13.GL_MULTISAMPLE
 import java.io.File
-import kotlin.math.tan
 
 fun main() {
     // RenderSystem.logging = true
@@ -30,8 +40,67 @@ fun main() {
     window.vSync = true
     window.visible = true
 
-    val texture = Texture.fromPNG(File("src/main/resources/brick_wall.png").inputStream())
+    val texture = Texture.fromPNG(File("src/main/resources/x_90_talon_dark_gray.png").inputStream())
 
+    val model = OBJModelFormat().loadFrom(File("src/main/resources/x_90_talon.obj").readText())
+    val renderers = model.groups.map { group ->
+        MeshRender(group.mesh, texture)
+    }
+    val modelObject = CombinedObject3(renderers)
+    /*val mesh = Mesh(
+        mutableListOf(Triangle(
+            Vec3f(),
+            Vec3f(-0.5f, -0.5f, 0.0f),
+            Vec3f(0.5f, -0.5f, 0.0f),
+            Vec3f(0.0f,  0.5f, 0.0f)
+        )),
+        mutableListOf(
+            TextureFace(
+                TextureCoordinate(0.0f, 0.0f, 0.0f),
+                TextureCoordinate(1.0f, 0.0f, 0.0f),
+                TextureCoordinate(0.5f, 1.0f, 0.0f)
+            )
+        )
+    )
+    val modelObject = MeshRender(mesh, texture)*/
+
+    val projection = Mat4f.identity() * Mat4f.perspective(Anglef.fromDegrees(70f), window.aspect, 1f, 1000f)
+    val poseStack = Mat4fStack(mutableListOf(Mat4f.identity()))
+
+    RenderSystem.enableMultisample()
+
+    window.keyCallback = { key, _, action, _ ->
+        if (key == GLFW_KEY_ESCAPE && action == Key.Action.PRESS) {
+            window.close()
+        }
+        if (key == GLFW_KEY_W && action == Key.Action.REPEAT) {
+            modelObject.position = modelObject.position + Vec3f(0f, 0f, -0.2f)
+        }
+        if (key == GLFW_KEY_S && action == Key.Action.REPEAT) {
+            modelObject.position = modelObject.position + Vec3f(0f, 0f, 0.2f)
+        }
+        if (key == GLFW_KEY_A && action == Key.Action.REPEAT) {
+            modelObject.position = modelObject.position + Vec3f(-0.2f, 0f, 0f)
+        }
+        if (key == GLFW_KEY_D && action == Key.Action.REPEAT) {
+            modelObject.position = modelObject.position + Vec3f(0.2f, 0f, 0f)
+        }
+    }
+
+    modelObject.initRender()
+
+    modelObject.scale = Vec3f(0.001f, 0.001f, 0.001f)
+
+    window.loop {
+        backgroundColor = Color.BLACK
+        println(modelObject.position)
+        modelObject.tick()
+        poseStack.push()
+        modelObject.render(poseStack, projection, 0f)
+        poseStack.pop()
+    }
+
+/*
     val vertexShaderSource = """
         #version 330 core
 
@@ -73,9 +142,9 @@ fun main() {
     vao.bind()
 
     val vert = floatArrayOf(
-        -0.5f, -0.5f, -2.0f,
-        0.5f, -0.5f, -2.0f,
-        0.0f,  0.5f, -2.0f
+        -0.5f, -0.5f, 0.0f,
+        0.5f, -0.5f, 0.0f,
+        0.0f,  0.5f, 0.0f
     )
     val bufferVert = GPUBufferObject(GPUBufferObject.Type.ARRAY)
     bufferVert.execute {
@@ -135,27 +204,33 @@ fun main() {
 
     RenderSystem.enableMultisample()
 
-    var z = 0f
+    var z = -2.7f
+    var yaw = 0f
     window.loop {
         poseStack.push()
         poseStack.translate(Vec3f(0f, 0f, z))
-        z -= 0.01f
+        poseStack.rotate(Vec3f(0f, 1f, 0f), Anglef.fromDegrees(yaw).normalized)
+        //z -= 0.01f
+        yaw += 0.5f
         glViewport(0, 0, window.width, window.height)
         backgroundColor = Color.BLACK
         program.execute {
             //poseStack.rotate(Vec3f(0f, 1f, 0f), Anglef.fromDegrees(0.5f))
-            textureSamplerParam.set(0)
-            worldMatrixParam.set(poseStack.top())
-            projectionMatrixParam.set(projection)
-            vao.execute {
-                RenderSystem.GL.activateTexture(0)
-                texture.execute {
-                    drawArrays(RenderSystem.RenderMode.TRIANGLES, 0, 3)
+            RenderSystem.allocateTextureSampler { textureSampler ->
+                textureSamplerParam.set(textureSampler)
+                worldMatrixParam.set(poseStack.top())
+                projectionMatrixParam.set(projection)
+                vao.execute {
+                    textureSampler.bind()
+                    texture.execute {
+                        drawArrays(RenderSystem.RenderMode.TRIANGLES, 0, 3)
+                    }
                 }
             }
         }
         poseStack.pop()
     }
+    */
 
     window.close()
     RenderSystem.terminate()
