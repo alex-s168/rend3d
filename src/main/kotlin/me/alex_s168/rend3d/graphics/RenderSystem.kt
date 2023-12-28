@@ -5,8 +5,7 @@ import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL15.*
 import org.lwjgl.opengl.GL20.*
-import org.lwjgl.opengl.GL30.glBindVertexArray
-import org.lwjgl.opengl.GL30.glGenVertexArrays
+import org.lwjgl.opengl.GL30.*
 import java.nio.ByteBuffer
 
 object RenderSystem {
@@ -46,6 +45,90 @@ object RenderSystem {
         GLFW.glfwTerminate()
         GLFW.glfwSetErrorCallback(null)?.free()
         initialized = false
+    }
+
+    /**
+     * If true, textures will be automatically resized to the nearest power of 2.
+     */
+    var autoResizeTextures = false
+
+    enum class DepthFunc(val glFunc: Int) {
+        NEVER(GL_NEVER),
+        LESS(GL_LESS),
+        EQUAL(GL_EQUAL),
+        LEQUAL(GL_LEQUAL),
+        GREATER(GL_GREATER),
+        NOTEQUAL(GL_NOTEQUAL),
+        GEQUAL(GL_GEQUAL),
+        ALWAYS(GL_ALWAYS)
+    }
+
+    enum class BlendFuncParam(val glFunc: Int) {
+        ZERO(GL_ZERO),
+        ONE(GL_ONE),
+        SRC_COLOR(GL_SRC_COLOR),
+        ONE_MINUS_SRC_COLOR(GL_ONE_MINUS_SRC_COLOR),
+        DST_COLOR(GL_DST_COLOR),
+        ONE_MINUS_DST_COLOR(GL_ONE_MINUS_DST_COLOR),
+        SRC_ALPHA(GL_SRC_ALPHA),
+        ONE_MINUS_SRC_ALPHA(GL_ONE_MINUS_SRC_ALPHA),
+        DST_ALPHA(GL_DST_ALPHA),
+        ONE_MINUS_DST_ALPHA(GL_ONE_MINUS_DST_ALPHA),
+        CONSTANT_COLOR(GL_CONSTANT_COLOR),
+        ONE_MINUS_CONSTANT_COLOR(GL_ONE_MINUS_CONSTANT_COLOR),
+        CONSTANT_ALPHA(GL_CONSTANT_ALPHA),
+        ONE_MINUS_CONSTANT_ALPHA(GL_ONE_MINUS_CONSTANT_ALPHA),
+        SRC_ALPHA_SATURATE(GL_SRC_ALPHA_SATURATE)
+    }
+
+    fun enableDepthTest(func: DepthFunc) {
+        logRenderCall("Enable", GL_DEPTH_TEST)
+        glEnable(GL_DEPTH_TEST)
+        logRenderCall("DepthFunc", func.glFunc)
+        glDepthFunc(func.glFunc)
+    }
+
+    fun disableDepthTest() {
+        logRenderCall("Disable", GL_DEPTH_TEST)
+        glDisable(GL_DEPTH_TEST)
+    }
+
+    fun enableBlend() {
+        logRenderCall("Enable", GL_BLEND)
+        glEnable(GL_BLEND)
+    }
+
+    fun disableBlend() {
+        logRenderCall("Disable", GL_BLEND)
+        glDisable(GL_BLEND)
+    }
+
+    fun blendFunc(funcSource: BlendFuncParam, funcDest: BlendFuncParam) {
+        logRenderCall("BlendFunc", funcSource.glFunc, funcDest.glFunc)
+        glBlendFunc(funcSource.glFunc, funcDest.glFunc)
+    }
+
+    fun enableCullFace(front: Boolean, back: Boolean) {
+        logRenderCall("Enable", GL_CULL_FACE)
+        glEnable(GL_CULL_FACE)
+        val x = (if (front) GL_FRONT else 0) or (if (back) GL_BACK else 0)
+        logRenderCall("CullFace", x)
+        glCullFace(x)
+    }
+
+    fun disableCullFace() {
+        logRenderCall("Disable", GL_CULL_FACE)
+        glDisable(GL_CULL_FACE)
+    }
+
+    fun enableMultisample() {
+        logRenderCall("Enable", GL_MULTISAMPLE)
+        glEnable(GL_MULTISAMPLE)
+    }
+
+    fun disableMultisample() {
+        logRenderCall("Disable", GL_MULTISAMPLE)
+        glDisable(GL_MULTISAMPLE)
     }
 
     private var nextShaderAttrib = 0
@@ -256,6 +339,11 @@ object RenderSystem {
         fun unbindVertexArray() {
             logRenderCall("BindVertexArray", 0)
             glBindVertexArray(0)
+        }
+
+        fun generateMipmap2d() {
+            logRenderCall("GenerateMipmap", GL_TEXTURE_2D)
+            glGenerateMipmap(GL_TEXTURE_2D)
         }
 
         fun logRenderCall(name: String, vararg args: Any?) =

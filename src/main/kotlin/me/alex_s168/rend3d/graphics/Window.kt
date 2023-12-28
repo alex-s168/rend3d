@@ -10,11 +10,28 @@ import org.lwjgl.system.MemoryUtil.NULL
 
 class Window(
     val title: String,
-    val width: Int,
-    val height: Int,
+    var width: Int,
+    var height: Int,
     val resizable: Boolean = true,
-    visibleIn: Boolean = true
+    visibleIn: Boolean = true,
+    vararg parameters: Parameters.Parameter
 ): AutoCloseable {
+    object Parameters {
+        data class Parameter internal constructor(
+            val hint: Int,
+            val value: Int
+        )
+
+        fun DECORATED(value: Boolean) =
+            Parameter(GLFW_DECORATED, value.toGLFW())
+
+        fun FOCUSED(value: Boolean) =
+            Parameter(GLFW_FOCUSED, value.toGLFW())
+
+        fun SAMPLES(value: Int) =
+            Parameter(GLFW_SAMPLES, value)
+    }
+
     private var id: Long
 
     val aspect: Float
@@ -82,6 +99,19 @@ class Window(
             }
         }
 
+    var resizeCallback: (window: Window) -> Unit = { _ -> }
+        set(value) {
+            field = value
+            glfwSetWindowSizeCallback(
+                id
+            ) { _: Long, width: Int, height: Int ->
+                glViewport(0, 0, width, height)
+                this.width = width
+                this.height = height
+                value(this)
+            }
+        }
+
     // TODO: gamepad support
 
     var vSync: Boolean = false
@@ -110,12 +140,15 @@ class Window(
         glfwDefaultWindowHints()
         glfwWindowHint(GLFW_VISIBLE, visibleIn.toGLFW())
         glfwWindowHint(GLFW_RESIZABLE, resizable.toGLFW())
+        parameters.forEach {
+            glfwWindowHint(it.hint, it.value)
+        }
         id = glfwCreateWindow(width, height, title, NULL, NULL)
         if (id == NULL) {
             throw RuntimeException("Failed to create the GLFW window")
         }
 
-        stackPush().use { stack ->
+        stackPush().use {
             // Get the resolution of the primary monitor
             val vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor())
                 ?: throw RuntimeException("Failed to get the video mode")
@@ -134,6 +167,8 @@ class Window(
     fun execute(block: Window.() -> Unit) {
         val old = RenderSystem.currentWindow
         current = true
+        glViewport(0, 0, width, height)
+        resizeCallback = resizeCallback
         block(this)
         RenderSystem.currentWindow = old
     }
@@ -162,12 +197,14 @@ class Window(
     }
 
     fun loop(block: WindowLoopContext.() -> Unit) {
-        val context = WindowLoopContext(this)
-        while (!(glfwWindowShouldClose(id) || closed)) {
-            glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
-            context.block()
-            glfwSwapBuffers(id)
-            glfwPollEvents()
+        execute {
+            val context = WindowLoopContext(this)
+            while (!(glfwWindowShouldClose(id) || closed)) {
+                glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
+                context.block()
+                glfwSwapBuffers(id)
+                glfwPollEvents()
+            }
         }
     }
 }

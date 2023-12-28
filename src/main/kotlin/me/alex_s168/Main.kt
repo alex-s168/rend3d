@@ -17,29 +17,16 @@ import me.alex_s168.rend3d.graphics.Window
 import me.alex_s168.rend3d.input.Key
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL11.*
+import org.lwjgl.opengl.GL13.GL_MULTISAMPLE
 import java.io.File
 import kotlin.math.tan
 
-fun perspective(angle: Anglef, aspect: Float, near: Float, far: Float): Mat4f {
-    val tanHalfAngle = tan(angle.radians / 2.0).toFloat()
-    val xScale = 1.0f / tanHalfAngle / aspect
-    val yScale = 1.0f / tanHalfAngle
-    val fmn = far - near
-    val zScale = -(far + near) / fmn
-    val zOffset = -2.0f * far * near / fmn
-    return Mat4f(
-        xScale, 0.0f, 0.0f, 0.0f,
-        0.0f, yScale, 0.0f, 0.0f,
-        0.0f, 0.0f, zScale, zOffset,
-        0.0f, 0.0f, -1.0f, 0.0f
-    )
-}
-
 fun main() {
     // RenderSystem.logging = true
+    // RenderSystem.autoResizeTextures = true
     RenderSystem.initialize()
 
-    val window = Window("Hello World!", 300, 300, true, false)
+    val window = Window("Hello World!", 300, 300, true, false, Window.Parameters.SAMPLES(4))
     window.vSync = true
     window.visible = true
 
@@ -140,9 +127,13 @@ fun main() {
             poseStack.translate(Vec3f(0.1f, 0f, 0f))
         }
     }
-    
-    glEnable(GL_DEPTH_TEST)
-    glDepthFunc(GL_LESS)
+
+    RenderSystem.enableDepthTest(RenderSystem.DepthFunc.LESS)
+
+    RenderSystem.enableBlend()
+    RenderSystem.blendFunc(RenderSystem.BlendFuncParam.SRC_ALPHA, RenderSystem.BlendFuncParam.ONE_MINUS_SRC_ALPHA)
+
+    RenderSystem.enableMultisample()
 
     var z = 0f
     window.loop {
@@ -150,7 +141,6 @@ fun main() {
         poseStack.translate(Vec3f(0f, 0f, z))
         z -= 0.01f
         glViewport(0, 0, window.width, window.height)
-        glDisable(GL_CULL_FACE)
         backgroundColor = Color.BLACK
         program.execute {
             //poseStack.rotate(Vec3f(0f, 1f, 0f), Anglef.fromDegrees(0.5f))
