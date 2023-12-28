@@ -47,7 +47,7 @@ class MeshRender(
                 vao.execute {
                     texture.execute {
                         textureSampler.bind()
-                        drawArrays(RenderSystem.RenderMode.TRIANGLES, 0, 3)
+                        drawArrays(RenderSystem.RenderMode.TRIANGLES, 0, mesh.size * 3 * 3)
                     }
                 }
             }
@@ -80,7 +80,7 @@ class MeshRender(
             bufferTex.bufferData(sizeBytes = Float.SIZE_BYTES * 2 * 3 * mesh.size) {
                 mesh.forEach { face ->
                     fun s(v: TextureCoordinate?) {
-                        upload(floatArrayOf(0f + (v?.u ?: 0.0f), 0f + (v?.v ?: 0.0f)))
+                        upload(floatArrayOf(1f - (v?.u ?: 0.0f), 1f - (v?.v ?: 0.0f)))
                     }
                     s(face.tex?.a)
                     s(face.tex?.b)

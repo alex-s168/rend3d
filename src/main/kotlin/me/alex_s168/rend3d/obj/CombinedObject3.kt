@@ -6,6 +6,7 @@ import me.alex_s168.math.vec.impl.Quaternionf
 import me.alex_s168.math.vec.impl.Vec3f
 import me.alex_s168.rend3d.graphics.renderable.Renderable
 
+// TODO: fix
 class CombinedObject3(
     val objects: List<Object3>
 ): Object3(), Renderable {
@@ -16,16 +17,16 @@ class CombinedObject3(
             objects.forEach { it.position = it.position + off }
         }
 
-    override var rotation = Quaternionf()
+    override var rotation = Quaternionf(1f, 0f, 0f, 0f)
         set(value) {
             field = value
-            val off = value - lastRotation
+            val off = value / lastRotation
             objects.forEach { it.rotation = it.rotation * off }
         }
     override var scale = Vec3f(1f, 1f, 1f)
         set(value) {
             field = value
-            val off = value - lastScale
+            val off = value / lastScale
             objects.forEach { it.scale = it.scale * off }
         }
 

@@ -21,15 +21,33 @@ import me.alex_s168.math.vec.impl.Vec3f
 import me.alex_s168.meshlib.Mesh
 import me.alex_s168.meshlib.Triangle
 import me.alex_s168.meshlib.format.OBJModelFormat
+import me.alex_s168.meshlib.shapes.PerfectCube
 import me.alex_s168.meshlib.texture.TextureCoordinate
 import me.alex_s168.meshlib.texture.TextureFace
 import me.alex_s168.rend3d.graphics.RenderSystem
 import me.alex_s168.rend3d.graphics.Window
 import me.alex_s168.rend3d.graphics.renderable.MeshRender
+import me.alex_s168.rend3d.graphics.renderable.ModelRender
 import me.alex_s168.rend3d.input.Key
 import me.alex_s168.rend3d.obj.CombinedObject3
 import org.lwjgl.glfw.GLFW.*
 import java.io.File
+import kotlin.math.tan
+
+fun perspective(angle: Anglef, aspect: Float, near: Float, far: Float): Mat4f {
+    val tanHalfAngle = tan(angle.radians / 2.0).toFloat()
+    val xScale = 1.0f / tanHalfAngle / aspect
+    val yScale = 1.0f / tanHalfAngle
+    val fmn = far - near
+    val zScale = -(far + near) / fmn
+    val zOffset = -2.0f * far * near / fmn
+    return Mat4f(
+        xScale, 0.0f, 0.0f, 0.0f,
+        0.0f, yScale, 0.0f, 0.0f,
+        0.0f, 0.0f, zScale, zOffset,
+        0.0f, 0.0f, -1.0f, 0.0f
+    )
+}
 
 fun main() {
     // RenderSystem.logging = true
@@ -43,26 +61,7 @@ fun main() {
     val texture = Texture.fromPNG(File("src/main/resources/x_90_talon_dark_gray.png").inputStream())
 
     val model = OBJModelFormat().loadFrom(File("src/main/resources/x_90_talon.obj").readText())
-    val renderers = model.groups.map { group ->
-        MeshRender(group.mesh, texture)
-    }
-    val modelObject = CombinedObject3(renderers)
-    /*val mesh = Mesh(
-        mutableListOf(Triangle(
-            Vec3f(),
-            Vec3f(-0.5f, -0.5f, 0.0f),
-            Vec3f(0.5f, -0.5f, 0.0f),
-            Vec3f(0.0f,  0.5f, 0.0f)
-        )),
-        mutableListOf(
-            TextureFace(
-                TextureCoordinate(0.0f, 0.0f, 0.0f),
-                TextureCoordinate(1.0f, 0.0f, 0.0f),
-                TextureCoordinate(0.5f, 1.0f, 0.0f)
-            )
-        )
-    )
-    val modelObject = MeshRender(mesh, texture)*/
+    val modelObject = ModelRender(model.groups, texture)
 
     val projection = Mat4f.identity() * Mat4f.perspective(Anglef.fromDegrees(70f), window.aspect, 1f, 1000f)
     val poseStack = Mat4fStack(mutableListOf(Mat4f.identity()))
@@ -88,12 +87,13 @@ fun main() {
     }
 
     modelObject.initRender()
-
-    modelObject.scale = Vec3f(0.001f, 0.001f, 0.001f)
+    modelObject.scale = Vec3f(0.1f, 0.1f, 0.1f)
 
     window.loop {
         backgroundColor = Color.BLACK
         println(modelObject.position)
+        modelObject.rotation = modelObject.rotation * Quaternionf.fromAxisAngle(Vec3f(0f, 1f, 0f), Anglef.fromDegrees(1f))
+        println(modelObject.rotation)
         modelObject.tick()
         poseStack.push()
         modelObject.render(poseStack, projection, 0f)
