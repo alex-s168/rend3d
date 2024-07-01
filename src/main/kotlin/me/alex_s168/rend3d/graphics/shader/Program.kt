@@ -8,6 +8,8 @@ import me.alex_s168.math.mat.impl.Mat2i
 import me.alex_s168.math.mat.impl.Mat3f
 import me.alex_s168.math.mat.impl.Mat4f
 import me.alex_s168.math.vec.impl.*
+import org.joml.Matrix3f
+import org.joml.Matrix4f
 import org.lwjgl.opengl.GL20.*
 
 class Program(
@@ -63,7 +65,7 @@ class Program(
     class Parameters(
         private val program: Program
     ) {
-        operator fun get(name: String): UniformParameter {
+        operator fun get(name: String): UniformParameter? {
             if (!program.linked) {
                 throw IllegalStateException("Program not linked!")
             }
@@ -72,7 +74,7 @@ class Program(
             }
             val location = RenderSystem.GL.getUniformLocation(program.id, name)
             if (location == -1) {
-                throw IllegalStateException("Parameter $name not found!")
+                return null
             }
             return UniformParameter(location, program)
         }
@@ -195,17 +197,29 @@ class Program(
 
         fun set(value: Mat2f) {
             assertUsable()
-            glUniformMatrix2fv(location, false, value.asArray())
+            glUniformMatrix2fv(location, true, value.asArray())
         }
 
         fun set(value: Mat3f) {
             assertUsable()
-            glUniformMatrix3fv(location, false, value.asArray())
+            glUniformMatrix3fv(location, true, value.asArray())
         }
 
         fun set(value: Mat4f) {
             assertUsable()
-            glUniformMatrix4fv(location, false, value.asArray())
+            glUniformMatrix4fv(location, true, value.asArray())
+        }
+
+        private val fb16 = FloatArray(16)
+
+        fun set(value: Matrix4f) {
+            assertUsable()
+            glUniformMatrix4fv(location, false, value.get(fb16))
+        }
+
+        fun set(value: Matrix3f) {
+            assertUsable()
+            glUniformMatrix3fv(location, false, value.get(fb16))
         }
     }
 

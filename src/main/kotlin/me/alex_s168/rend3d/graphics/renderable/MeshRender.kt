@@ -1,7 +1,5 @@
 package me.alex_s168.rend3d.graphics.renderable
 
-import me.alex_s168.math.mat.impl.Mat4f
-import me.alex_s168.math.mat.stack.Mat4fStack
 import me.alex_s168.meshlib.Mesh
 import me.alex_s168.meshlib.texture.TextureCoordinate
 import me.alex_s168.rend3d.graphics.RenderSystem
@@ -12,6 +10,8 @@ import me.alex_s168.rend3d.graphics.shader.Program
 import me.alex_s168.rend3d.graphics.shader.Shader
 import me.alex_s168.rend3d.graphics.texture.Texture
 import me.alex_s168.rend3d.obj.Object3
+import org.joml.Matrix4f
+import org.joml.Matrix4fStack
 import org.lwjgl.opengl.GL11.*
 
 class MeshRender(
@@ -23,31 +23,30 @@ class MeshRender(
     private lateinit var vao: VertexArrayObject
     private lateinit var attribVert: GPUBufferProgramAttribute
     private lateinit var attribTex: GPUBufferProgramAttribute
-    private lateinit var paramTextureSampler: Program.UniformParameter
-    private lateinit var paramWorldMatrix: Program.UniformParameter
-    private lateinit var paramProjectionMatrix: Program.UniformParameter
+    private var paramTextureSampler: Program.UniformParameter? = null
+    private var paramWorldMatrix: Program.UniformParameter? = null
+    private var paramProjectionMatrix: Program.UniformParameter? = null
 
-    override fun render(poseStack: Mat4fStack, projection: Mat4f, partial: Float) {
-        poseStack.push()
+    override fun render(poseStack: Matrix4fStack, projection: Matrix4f, partial: Float) {
+        poseStack.pushMatrix()
 
-        poseStack.translate(position)
-        poseStack.rotate(rotation)
-        poseStack.scale(scale)
+        poseStack.translate(position.x, position.y, position.z)
+        poseStack.scale(scale.x, scale.y, scale.z)
+        poseStack.rotateXYZ(rotation.roll.radians, rotation.pitch.radians, rotation.yaw.radians)
 
         RenderSystem.enableDepthTest(RenderSystem.DepthFunc.LESS)
 
         RenderSystem.enableBlend()
         RenderSystem.blendFunc(RenderSystem.BlendFuncParam.SRC_ALPHA, RenderSystem.BlendFuncParam.ONE_MINUS_SRC_ALPHA)
 
-        // RenderSystem.enableCullFace(front = true, back = false)
-        // glFrontFace(GL_CCW)
-        RenderSystem.disableCullFace()
+        RenderSystem.enableCullFace(front = false, back = true)
+        glFrontFace(GL_CCW)
 
         program.execute {
             RenderSystem.allocateTextureSampler { textureSampler ->
-                paramTextureSampler.set(textureSampler)
-                paramWorldMatrix.set(poseStack.top())
-                paramProjectionMatrix.set(projection)
+                paramTextureSampler?.set(textureSampler)
+                paramWorldMatrix?.set(poseStack)
+                paramProjectionMatrix?.set(projection)
                 vao.execute {
                     texture.execute {
                         textureSampler.bind()
@@ -57,13 +56,13 @@ class MeshRender(
             }
         }
 
-        RenderSystem.disableDepthTest()
+        RenderSystem.disableCullFace()
 
         RenderSystem.disableBlend()
 
-        RenderSystem.disableCullFace()
+        RenderSystem.disableDepthTest()
 
-        poseStack.pop()
+        poseStack.popMatrix()
     }
 
     override fun initRender() {
@@ -71,10 +70,10 @@ class MeshRender(
         vao.execute {
             val bufferVert = GPUBufferObject(GPUBufferObject.Type.ARRAY)
             bufferVert.bufferData(sizeBytes = Float.SIZE_BYTES * 3 * 3 * mesh.size) {
-                mesh.triangles.forEach { tri ->
-                    upload(tri.a.toArray())
-                    upload(tri.b.toArray())
-                    upload(tri.c.toArray())
+                mesh.triangles.forEach { tri -> // TODO: make faster
+                    upload(tri.a.asArray())
+                    upload(tri.b.asArray())
+                    upload(tri.c.asArray())
                 }
             }
             attribVert = GPUBufferProgramAttribute(bufferVert)
@@ -140,7 +139,8 @@ class MeshRender(
             uniform sampler2D textureSampler;
     
             void main() {
-                fragColor = texture(textureSampler, out_TexCoord); 
+                vec4 tex = texture(textureSampler, out_TexCoord);
+                fragColor = tex;
             }
         """.trimIndent()
 

@@ -16,5 +16,6 @@ class VertexArrayObject {
     fun execute(block: VertexArrayObject.() -> Unit) {
         bind()
         block()
+        unbind()
     }
 }

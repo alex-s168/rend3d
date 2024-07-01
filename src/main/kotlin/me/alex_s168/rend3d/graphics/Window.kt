@@ -202,6 +202,7 @@ class Window(
             while (!(glfwWindowShouldClose(id) || closed)) {
                 glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
                 context.block()
+                glFlush()
                 glfwSwapBuffers(id)
                 glfwPollEvents()
             }
